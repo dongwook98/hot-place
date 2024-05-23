@@ -3,6 +3,7 @@ const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
 const getCoordsForAddress = require('../util/location');
+const Place = require('../models/place');
 
 // 메모리 스토리지. 나중에 데이터베이스로 교체 예정.
 let DUMMY_PLACES = [
@@ -68,16 +69,27 @@ const createPlace = async (req, res, next) => {
     return next(error);
   }
 
-  const createdPlace = {
-    id: uuid(),
+  // 모델의 인스턴스 생성
+  const createdPlace = new Place({
     title,
     description,
-    location: coordinates,
     address,
+    location: coordinates,
+    image:
+      'https://plus.unsplash.com/premium_photo-1669253767213-404f6888e895?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5fHx8ZW58MHx8fHx8',
     creator,
-  };
+  });
 
-  DUMMY_PLACES.push(createdPlace);
+  try {
+    // 모델의 인스턴스로 데이터베이스 문서 생성
+    await createdPlace.save();
+  } catch (err) {
+    const error = new HttpError(
+      '장소 생성에 실패했습니다. 다시 시도하세요.',
+      500
+    );
+    return next(error); // ! return 반드시 작성, 작성 안할시 다음 줄 실행
+  }
 
   res.status(201).json({ place: createdPlace });
 };
