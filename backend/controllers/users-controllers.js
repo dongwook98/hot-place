@@ -1,4 +1,5 @@
 const uuid = require('uuid').v4;
+const { validationResult } = require('express-validator');
 
 const HttpError = require('../models/http-error');
 
@@ -19,6 +20,14 @@ const getUsers = (req, res, next) => {
 };
 
 const signUp = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    throw new HttpError(
+      '유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.',
+      422
+    );
+  }
+
   const { name, email, password } = req.body;
 
   const hasUser = DUMMY_USERS.find((user) => user.email === email);
@@ -45,6 +54,14 @@ const signUp = (req, res, next) => {
 };
 
 const login = (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    throw new HttpError(
+      '유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.',
+      422
+    );
+  }
+
   const { email, password } = req.body;
 
   const identifiedUser = DUMMY_USERS.find((u) => u.email === email);
