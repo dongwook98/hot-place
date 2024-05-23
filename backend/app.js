@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const placesRoutes = require('./routes/places-routes');
 const usersRoutes = require('./routes/users-routes');
@@ -36,4 +37,14 @@ app.use((error, req, res, next) => {
     .json({ message: error.message || '알 수 없는 오류가 발생했습니다.' });
 });
 
-app.listen(5001);
+mongoose
+  .connect(
+    `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.w79twdx.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority&appName=Cluster0`
+  )
+  .then(() => {
+    // DB 연결에 성공했을 경우. 서버 실행
+    app.listen(5001);
+  })
+  .catch((error) => {
+    console.log(error);
+  });
