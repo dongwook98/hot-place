@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const placesRoutes = require('./routes/places-routes');
+const usersRoutes = require('./routes/users-routes');
 const HttpError = require('./models/http-error');
 
 const app = express();
@@ -14,7 +15,9 @@ app.use(bodyParser.json());
 
 app.use('/api/places', placesRoutes); // => /api/places/...
 
-// 라우트들에서 응답했다면 next를 호출하지 않기 때문에 이 미들웨어 실행이 안될 것.
+app.use('/api/users', usersRoutes); // => /api/users/...
+
+// 위 라우트들에서 응답했다면 next를 호출하지 않기 때문에 아래 미들웨어 실행이 안됨.
 // 지원하지 않는 라우트에 대한 오류 처리.
 app.use((req, res, next) => {
   const error = new HttpError('라우트를 찾지 못했습니다.', 404);
