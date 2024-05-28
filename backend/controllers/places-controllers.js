@@ -1,24 +1,10 @@
-const uuid = require('uuid').v4;
 const { validationResult } = require('express-validator');
+const mongoose = require('mongoose');
 
 const HttpError = require('../models/http-error');
 const getCoordsForAddress = require('../util/location');
 const Place = require('../models/place');
-
-// 메모리 스토리지. 나중에 데이터베이스로 교체 예정.
-let DUMMY_PLACES = [
-  {
-    id: 'p1',
-    title: '엠파이어 스파이어 빌딩',
-    description: '세상에서 가장 높은 빌딩',
-    location: {
-      lat: 40.7484474,
-      lng: -73.9871516,
-    },
-    address: '20 W 34th St, New York, NY 10001',
-    creator: 'u1',
-  },
-];
+const User = require('../models/user');
 
 const getPlaceById = async (req, res, next) => {
   const placeId = req.params.pId;
@@ -50,9 +36,7 @@ const getPlacesByUserId = async (req, res, next) => {
 
   let places;
   try {
-    places = (await Place.find({ creator: userId })).map((place) =>
-      place.toObject({ getters: true })
-    );
+    places = await Place.find({ creator: userId });
   } catch (err) {
     const error = new HttpError(
       '오류가 발생했습니다. 장소들을 찾을 수 없습니다.',
@@ -68,7 +52,9 @@ const getPlacesByUserId = async (req, res, next) => {
     );
   }
 
-  res.json({ places: places });
+  res.json({
+    places: places.map((place) => place.toObject({ getters: true })),
+  });
 };
 
 const createPlace = async (req, res, next) => {
@@ -82,7 +68,6 @@ const createPlace = async (req, res, next) => {
     );
   }
 
-  // POST 요청에는 본문에 데이터가 있음.
   const { title, description, address, creator } = req.body;
 
   let coordinates;
@@ -103,15 +88,46 @@ const createPlace = async (req, res, next) => {
     creator,
   });
 
+  let user;
   try {
-    // 모델의 인스턴스로 데이터베이스 문서 생성
-    await createdPlace.save();
+    user = await User.findById(creator);
+  } catch (err) {
+    const error = new HttpError(
+      '장소 생성에 실패했으니, 다시 시도해주세요.',
+      500
+    );
+    return next(error);
+  }
+
+  if (!user) {
+    const error = new HttpError(
+      '제공된 ID에 해당하는 사용자를 찾을 수 없습니다.',
+      404
+    );
+    return next(error);
+  }
+
+  console.log(user);
+
+  try {
+    // 트랜잭션을 하기위해 세션 시작
+    const sess = await mongoose.startSession();
+    // 트랜잭션 시작
+    sess.startTransaction();
+    // places 문서에 장소 생성 저장
+    await createdPlace.save({ session: sess });
+    // users 문서에 장소 id 추가
+    user.places.push(createdPlace);
+    // users 문서 저장
+    await user.save({ session: sess });
+    // 트랜잭션 커밋
+    await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError(
       '장소 생성에 실패했습니다. 다시 시도하세요.',
       500
     );
-    return next(error); // ! return 반드시 작성, 작성 안할시 다음 줄 실행
+    return next(error);
   }
 
   res.status(201).json({ place: createdPlace });
@@ -120,9 +136,11 @@ const createPlace = async (req, res, next) => {
 const updatePlace = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    throw new HttpError(
-      '유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.',
-      422
+    return next(
+      new HttpError(
+        '유효하지 않은 입력 데이터를 전달했습니다. 데이터를 확인하세요.',
+        422
+      )
     );
   }
 
@@ -152,7 +170,7 @@ const updatePlace = async (req, res, next) => {
     return next(error);
   }
 
-  res.status(200).json({ place: place.toObject({ getters: true }) });
+  res.json({ place: place.toObject({ getters: true }) });
 };
 
 const deletePlace = async (req, res, next) => {
@@ -160,17 +178,27 @@ const deletePlace = async (req, res, next) => {
 
   let place;
   try {
-    place = await Place.findById(placeId);
+    place = await Place.findById(placeId).populate('creator');
   } catch (err) {
     const error = new HttpError(
       '오류가 발생했습니다. 장소를 삭제할 수 없습니다.',
       500
     );
+    return next(error);
+  }
+
+  if (!place) {
+    const error = new HttpError('제공된 ID에 해당하는 장소가 없습니다.', 404);
     return next(error);
   }
 
   try {
-    await place.deleteOne();
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await place.deleteOne({ session: sess });
+    place.creator.places.pull(place);
+    await place.creator.save({ session: sess });
+    await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError(
       '오류가 발생했습니다. 장소를 삭제할 수 없습니다.',
@@ -179,7 +207,7 @@ const deletePlace = async (req, res, next) => {
     return next(error);
   }
 
-  res.status(200).json({ message: '장소 삭제에 성공 하였습니다.' });
+  res.json({ message: '장소 삭제에 성공 하였습니다.' });
 };
 
 exports.getPlaceById = getPlaceById;
