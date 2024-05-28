@@ -11,7 +11,7 @@ const placeSchema = new Schema({
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },
   },
-  creator: { type: String, required: true },
+  creator: { type: mongoose.Types.ObjectId, required: true, ref: 'User' }, // Place 모델과 연결
 });
 
 // model 메서드: 첫번째 인수의 이름을 가지는 생성자 함수 반환
