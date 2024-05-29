@@ -4,6 +4,8 @@ import './Auth.css';
 import Input from '../../shared/components/FormElement/Input';
 import Button from '../../shared/components/FormElement/Button';
 import Card from '../../shared/components/UIElement/Card';
+import ErrorModal from '../../shared/components/UIElement/ErrorModal';
+import LoadingSpinner from '../../shared/components/UIElement/LoadingSpinner';
 import {
   VALIDATOR_EMAIL,
   VALIDATOR_MINLENGTH,
@@ -61,7 +63,9 @@ const Auth = () => {
     event.preventDefault();
 
     if (isLoginMode) {
+      // 로그인 http 요청
     } else {
+      // 회원가입 http 요청
       try {
         setIsLoading(true);
         const response = await fetch(
@@ -79,60 +83,73 @@ const Auth = () => {
           }
         );
         const responseData = await response.json();
+        // fetch API는 400, 500번대 응답을 catch 블럭으로 처리하지 않아서 아래 if문 블럭 작성
+        if (!response.ok) {
+          throw new Error(responseData.message);
+        }
         console.log(responseData);
+        setIsLoading(false);
+        auth.login();
       } catch (err) {
         console.log(err);
+        setIsLoading(false);
         setError(
           err.message || '오류가 발생하였습니다. 잠시 후 다시 시도해주세요.'
         );
       }
     }
-    setIsLoading(false);
-    auth.login();
+  };
+
+  const errorHandler = () => {
+    setError(null);
   };
 
   return (
-    <Card className='authentication'>
-      <h2>로그인</h2>
-      <hr />
-      <form onSubmit={authSubmitHandler}>
-        {!isLoginMode && (
+    <React.Fragment>
+      <ErrorModal error={error} onClear={errorHandler} />
+      <Card className='authentication'>
+        {isLoading && <LoadingSpinner asOverlay />}
+        <h2>로그인</h2>
+        <hr />
+        <form onSubmit={authSubmitHandler}>
+          {!isLoginMode && (
+            <Input
+              element='input'
+              id='name'
+              type='text'
+              label='이름'
+              validators={[VALIDATOR_REQUIRE()]}
+              errorText='이름을 입력해주세요.'
+              onInput={inputHandler}
+            />
+          )}
           <Input
+            id='email'
             element='input'
-            id='name'
-            type='text'
-            label='이름'
-            validators={[VALIDATOR_REQUIRE()]}
-            errorText='이름을 입력해주세요.'
+            type='email'
+            label='이메일'
+            validators={[VALIDATOR_REQUIRE(), VALIDATOR_EMAIL()]}
+            errorText='이메일 형식을 입력해주세요.'
             onInput={inputHandler}
           />
-        )}
-        <Input
-          id='email'
-          element='input'
-          type='email'
-          label='이메일'
-          validators={[VALIDATOR_REQUIRE(), VALIDATOR_EMAIL()]}
-          errorText='이메일 형식을 입력해주세요.'
-          onInput={inputHandler}
-        />
-        <Input
-          id='password'
-          element='input'
-          type='password'
-          label='비밀번호'
-          validators={[VALIDATOR_MINLENGTH(8)]}
-          errorText='최소 8글자 이상 입력해주세요.'
-          onInput={inputHandler}
-        />
-        <Button type='submit' disabled={!formState.isFormValid}>
-          {isLoginMode ? '로그인' : '회원가입'}
+          <Input
+            id='password'
+            element='input'
+            type='password'
+            label='비밀번호'
+            validators={[VALIDATOR_MINLENGTH(8)]}
+            errorText='최소 8글자 이상 입력해주세요.'
+            onInput={inputHandler}
+          />
+          <Button type='submit' disabled={!formState.isFormValid}>
+            {isLoginMode ? '로그인' : '회원가입'}
+          </Button>
+        </form>
+        <Button inverse onClick={switchModeHandler}>
+          {isLoginMode ? '회원가입 하러가기' : '로그인 하러가기'}
         </Button>
-      </form>
-      <Button inverse onClick={switchModeHandler}>
-        {isLoginMode ? '회원가입 하러가기' : '로그인 하러가기'}
-      </Button>
-    </Card>
+      </Card>
+    </React.Fragment>
   );
 };
 
