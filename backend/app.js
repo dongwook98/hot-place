@@ -14,9 +14,22 @@ const app = express();
 // 그리고 자동으로 next를 호출해서 순서상 다음 미들웨어에 도달.
 app.use(bodyParser.json());
 
-app.use('/api/places', placesRoutes); // => /api/places/...
+// CORS 에러 처리
+app.use((req, res, next) => {
+  // 도메인 허용
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  // 요청 헤더 허용
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+  );
+  // 요청 메서드 허용
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
+  next();
+});
 
-app.use('/api/users', usersRoutes); // => /api/users/...
+app.use('/api/places', placesRoutes);
+app.use('/api/users', usersRoutes);
 
 // 위 라우트들에서 응답했다면 next를 호출하지 않기 때문에 아래 미들웨어 실행이 안됨.
 // 지원하지 않는 라우트에 대한 오류 처리.
