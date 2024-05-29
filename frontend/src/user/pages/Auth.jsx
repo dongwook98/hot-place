@@ -64,6 +64,34 @@ const Auth = () => {
 
     if (isLoginMode) {
       // 로그인 http 요청
+      try {
+        setIsLoading(true);
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/api/users/login`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: formState.inputs.email.value,
+              password: formState.inputs.password.value,
+            }),
+          }
+        );
+        const responseData = await response.json();
+        if (!response.ok) {
+          throw new Error(responseData.message);
+        }
+        setIsLoading(false);
+        auth.login();
+      } catch (err) {
+        console.log(err);
+        setIsLoading(false);
+        setError(
+          err.message || '오류가 발생하였습니다. 잠시 후 다시 시도해주세요.'
+        );
+      }
     } else {
       // 회원가입 http 요청
       try {
@@ -87,7 +115,6 @@ const Auth = () => {
         if (!response.ok) {
           throw new Error(responseData.message);
         }
-        console.log(responseData);
         setIsLoading(false);
         auth.login();
       } catch (err) {
