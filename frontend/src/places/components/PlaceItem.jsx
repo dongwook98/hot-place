@@ -6,11 +6,15 @@ import Button from '../../shared/components/FormElement/Button';
 import Modal from '../../shared/components/UIElement/Modal';
 import Map from '../../shared/components/UIElement/Map';
 import { AuthContext } from '../../shared/context/auth-context';
+import { useHttpClient } from '../../shared/hooks/http-hook';
+import ErrorModal from '../../shared/components/UIElement/ErrorModal';
+import LoadingSpinner from '../../shared/components/UIElement/LoadingSpinner';
 
 const PlaceItem = (props) => {
   const auth = useContext(AuthContext);
   const [showMap, setShowMap] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
 
   const openMapHandler = () => {
     setShowMap(true);
@@ -28,13 +32,20 @@ const PlaceItem = (props) => {
     setShowConfirmModal(false);
   };
 
-  const confirmDeleteHandler = () => {
+  const confirmDeleteHandler = async () => {
     setShowConfirmModal(false);
-    console.log('삭제중...');
+    try {
+      await sendRequest(
+        `${process.env.REACT_APP_API_URL}/api/places/${props.id}`,
+        'DELETE'
+      );
+      props.onDelete(props.id);
+    } catch (err) {}
   };
 
   return (
     <React.Fragment>
+      <ErrorModal error={error} onClear={clearError} />
       <Modal
         show={showMap}
         onCancel={closeMapHandler}
@@ -50,23 +61,24 @@ const PlaceItem = (props) => {
       <Modal
         show={showConfirmModal}
         onCancel={cancelDeleteHandler}
-        header='Are you Sure?'
+        header='경고'
         footerClass='place-item__modal-actions'
         footer={
-          <>
+          <React.Fragment>
             <Button inverse onClick={cancelDeleteHandler}>
               취소
             </Button>
             <Button danger onClick={confirmDeleteHandler}>
               삭제
             </Button>
-          </>
+          </React.Fragment>
         }
       >
-        <p>삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.</p>
+        <p>해당 핫 스팟을 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.</p>
       </Modal>
       <li className='place-item'>
         <Card className='place-item__content'>
+          {isLoading && <LoadingSpinner asOverlay />}
           <div className='place-item__image'>
             <img src={props.image} alt={props.title} />
           </div>
@@ -79,10 +91,10 @@ const PlaceItem = (props) => {
             <Button inverse onClick={openMapHandler}>
               지도에서 보기
             </Button>
-            {auth.isLoggedIn && (
+            {auth.userId === props.creatorId && (
               <Button to={`/places/${props.id}`}>수정</Button>
             )}
-            {auth.isLoggedIn && (
+            {auth.userId === props.creatorId && (
               <Button danger onClick={showDeleteConfirmHandler}>
                 삭제
               </Button>
