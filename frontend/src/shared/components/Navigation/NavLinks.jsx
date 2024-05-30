@@ -17,7 +17,7 @@ const NavLinks = () => {
       </li>
       {auth.isLoggedIn && (
         <li>
-          <NavLink to='/u1/places' exact>
+          <NavLink to={`${auth.userId}/places`} exact>
             나의 스팟
           </NavLink>
         </li>
