@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -13,6 +16,9 @@ const app = express();
 // 객체나 배열과 같이 일반적인 JS 데이터 구조로 변환.
 // 그리고 자동으로 next를 호출해서 순서상 다음 미들웨어에 도달.
 app.use(bodyParser.json());
+
+// express.static(): 이미지 정적 서빙 미들웨어
+app.use('/uploads/images', express.static(path.join('uploads', 'images')));
 
 // CORS 에러 처리
 app.use((req, res, next) => {
@@ -40,6 +46,13 @@ app.use((req, res, next) => {
 
 // default 에러 핸들러. 중복 제거.
 app.use((error, req, res, next) => {
+  // Multer가 파일이 있는 경우 request 객체에 file 프로퍼티 추가해줌
+  if (req.file) {
+    // 이미지 업로드 롤백
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    });
+  }
   if (res.headerSent) {
     // 이미 응답을 전송했다면 응답을 전송하지 않도록 설정
     return next(error);
