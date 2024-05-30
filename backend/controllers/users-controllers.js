@@ -9,7 +9,7 @@ const getUsers = async (req, res, next) => {
     users = await User.find({}, '-password');
   } catch (err) {
     const error = new HttpError(
-      '사용자 리스트를 가져오는데 실패하였습니다. 나중에 다시 시도해주세요.',
+      '사용자 목록 데이터를 가져오는데 실패하였습니다. 나중에 다시 시도해주세요.',
       500
     );
     return next(error);
@@ -31,7 +31,8 @@ const signUp = async (req, res, next) => {
 
   const { name, email, password } = req.body;
 
-  // uniqueValidator 패키지에서 불러온 유효성 검사를 사용하면 기술적인 메시지가 전달될 가능성 존재
+  // uniqueValidator 패키지에서 불러온 유효성 검사를 사용하면
+  // 기술적인 메시지가 전달될 가능성 존재
   // 그래서 수동 유효성 검사 로직 추가.
   let existingUser;
   try {
@@ -55,8 +56,7 @@ const signUp = async (req, res, next) => {
   const createdUser = new User({
     name,
     email,
-    image:
-      'https://plus.unsplash.com/premium_photo-1669253767213-404f6888e895?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5fHx8ZW58MHx8fHx8',
+    image: req.file.path,
     password,
     places: [],
   });
@@ -94,7 +94,7 @@ const login = async (req, res, next) => {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
     const error = new HttpError(
-      '로그인에 실패했으니 나중에 다시 시도하세요.',
+      '로그인에 실패했습니다. 나중에 다시 시도하세요.',
       500
     );
     return next(error);
