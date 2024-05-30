@@ -6,6 +6,7 @@ import Button from '../../shared/components/FormElement/Button';
 import Card from '../../shared/components/UIElement/Card';
 import ErrorModal from '../../shared/components/UIElement/ErrorModal';
 import LoadingSpinner from '../../shared/components/UIElement/LoadingSpinner';
+import ImageUpload from '../../shared/components/FormElement/ImageUpload';
 import {
   VALIDATOR_EMAIL,
   VALIDATOR_MINLENGTH,
@@ -40,6 +41,7 @@ const Auth = () => {
         {
           ...formState.inputs,
           name: undefined,
+          image: undefined,
         },
         formState.inputs.email.isValid && formState.inputs.password.isValid
       );
@@ -50,6 +52,10 @@ const Auth = () => {
           ...formState.inputs,
           name: {
             value: '',
+            isValid: false,
+          },
+          image: {
+            value: null,
             isValid: false,
           },
         },
@@ -63,7 +69,6 @@ const Auth = () => {
     event.preventDefault();
 
     if (isLoginMode) {
-      // 로그인 http 요청
       try {
         const responseData = await sendRequest(
           `${process.env.REACT_APP_API_URL}/api/users/login`,
@@ -79,19 +84,17 @@ const Auth = () => {
         auth.login(responseData.user.id);
       } catch (err) {}
     } else {
-      // 회원가입 http 요청
+      // 바이너리 데이터인 파일을 전송하기 위해 FormData API 사용
+      const formData = new FormData();
+      formData.append('email', formState.inputs.email.value);
+      formData.append('name', formState.inputs.name.value);
+      formData.append('password', formState.inputs.password.value);
+      formData.append('image', formState.inputs.image.value);
       try {
         const responseData = await sendRequest(
           `${process.env.REACT_APP_API_URL}/api/users/signup`,
           'POST',
-          JSON.stringify({
-            name: formState.inputs.name.value,
-            email: formState.inputs.email.value,
-            password: formState.inputs.password.value,
-          }),
-          {
-            'Content-Type': 'application/json',
-          }
+          formData // formData 사용 시 Fetch API가 자동으로 올바른 헤더 추가해줌
         );
         auth.login(responseData.user.id);
       } catch (err) {}
@@ -116,6 +119,9 @@ const Auth = () => {
               errorText='이름을 입력해주세요.'
               onInput={inputHandler}
             />
+          )}
+          {!isLoginMode && (
+            <ImageUpload center id='image' onInput={inputHandler} />
           )}
           <Input
             id='email'
