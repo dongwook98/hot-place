@@ -32,6 +32,10 @@ const NewPlace = () => {
         value: '',
         isValid: false,
       },
+      image: {
+        value: null,
+        isValid: false,
+      },
     },
     false
   );
