@@ -10,8 +10,8 @@ const PlaceList = (props) => {
     return (
       <div className='place-list center'>
         <Card>
-          <h2>장소가 없습니다. 공유해보세요.</h2>
-          <Button to='/place/new'>장소 공유하기</Button>
+          <h2>핫 스팟이 없습니다. 나만의 핫 스팟을 공유해보세요.</h2>
+          <Button to='/place/new'>핫 스팟 공유하기</Button>
         </Card>
       </div>
     );

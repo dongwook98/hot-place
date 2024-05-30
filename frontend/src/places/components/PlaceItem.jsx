@@ -63,7 +63,7 @@ const PlaceItem = (props) => {
           </>
         }
       >
-        <p>삭제하시겠습니까? 삭제 후에는 취소할 수 없습니다.</p>
+        <p>삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.</p>
       </Modal>
       <li className='place-item'>
         <Card className='place-item__content'>

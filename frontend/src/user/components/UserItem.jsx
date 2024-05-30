@@ -16,8 +16,8 @@ const UserItem = (props) => {
           <div className='user-item__info'>
             <h2>{props.name}</h2>
             <h3>
-              {props.placeCount} {props.placeCount === 1 ? '장소' : '장소들'}{' '}
-              공유
+              {props.placeCount}{' '}
+              {props.placeCount === 1 ? '핫 스팟' : '핫 스팟들을'} 공유 중
             </h3>
           </div>
         </Link>

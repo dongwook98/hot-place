@@ -110,7 +110,7 @@ const login = async (req, res, next) => {
 
   res.json({
     message: '로그인에 성공하였습니다.',
-    user: existingUser,
+    user: existingUser.toObject({ getters: true }),
   });
 };
 

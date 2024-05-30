@@ -38,7 +38,7 @@ const MainNavigation = (props) => {
           <span />
         </button>
         <h1 className='main-navigation__title'>
-          <Link to='/'>장소 공유</Link>
+          <Link to='/'>핫 스팟</Link>
         </h1>
         <nav className='main-navigation__header-nav'>
           <NavLinks />
