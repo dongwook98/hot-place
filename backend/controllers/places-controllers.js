@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const { validationResult } = require('express-validator');
 const mongoose = require('mongoose');
 
@@ -191,6 +193,8 @@ const deletePlace = async (req, res, next) => {
     return next(error);
   }
 
+  const imagePath = place.image;
+
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -205,6 +209,11 @@ const deletePlace = async (req, res, next) => {
     );
     return next(error);
   }
+
+  // 이미지 파일 삭제
+  fs.unlink(imagePath, (err) => {
+    console.log(err);
+  });
 
   res.json({ message: '장소 삭제에 성공 하였습니다.' });
 };
