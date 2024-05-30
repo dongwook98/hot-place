@@ -1,4 +1,5 @@
 import React, { useContext } from 'react';
+import { useHistory } from 'react-router-dom';
 
 import './PlaceForm.css';
 import Input from '../../shared/components/FormElement/Input';
@@ -34,6 +35,8 @@ const NewPlace = () => {
     false
   );
 
+  const history = useHistory();
+
   const placeSubmitHandler = async (event) => {
     event.preventDefault();
     try {
@@ -50,7 +53,8 @@ const NewPlace = () => {
           'Content-Type': 'application/json',
         }
       );
-      // 리다이렉트
+      // 성공 시 리다이렉트
+      history.push('/');
     } catch (err) {}
   };
 
