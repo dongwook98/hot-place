@@ -16,13 +16,16 @@ import { AuthContext } from './shared/context/auth-context';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState();
 
-  const login = useCallback(() => {
+  const login = useCallback((userId) => {
     setIsLoggedIn(true);
+    setUserId(userId);
   }, []);
 
   const logout = useCallback(() => {
     setIsLoggedIn(false);
+    setUserId(null);
   }, []);
 
   let routes;
@@ -62,7 +65,7 @@ const App = () => {
   }
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, userId, login, logout }}>
       <Router>
         <MainNavigation />
         {/* Switch 블록에 있는 코드는 일치하는 라우트를 만나면 다음 줄 평가 X */}

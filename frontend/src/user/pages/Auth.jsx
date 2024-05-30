@@ -11,14 +11,14 @@ import {
   VALIDATOR_MINLENGTH,
   VALIDATOR_REQUIRE,
 } from '../../shared/util/validators';
-import { useForm } from '../../shared/hooks/form-hooks';
+import { useForm } from '../../shared/hooks/form-hook';
+import { useHttpClient } from '../../shared/hooks/http-hook';
 import { AuthContext } from '../../shared/context/auth-context';
 
 const Auth = () => {
   const auth = useContext(AuthContext);
   const [isLoginMode, setIsLoginMode] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState();
+  const { isLoading, error, sendRequest, clearError } = useHttpClient();
   const [formState, inputHandler, setFormData] = useForm(
     {
       email: {
@@ -65,75 +65,42 @@ const Auth = () => {
     if (isLoginMode) {
       // 로그인 http 요청
       try {
-        setIsLoading(true);
-        const response = await fetch(
+        const responseData = await sendRequest(
           `${process.env.REACT_APP_API_URL}/api/users/login`,
+          'POST',
+          JSON.stringify({
+            email: formState.inputs.email.value,
+            password: formState.inputs.password.value,
+          }),
           {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              email: formState.inputs.email.value,
-              password: formState.inputs.password.value,
-            }),
+            'Content-Type': 'application/json',
           }
         );
-        const responseData = await response.json();
-        if (!response.ok) {
-          throw new Error(responseData.message);
-        }
-        setIsLoading(false);
-        auth.login();
-      } catch (err) {
-        console.log(err);
-        setIsLoading(false);
-        setError(
-          err.message || '오류가 발생하였습니다. 잠시 후 다시 시도해주세요.'
-        );
-      }
+        auth.login(responseData.user.id);
+      } catch (err) {}
     } else {
       // 회원가입 http 요청
       try {
-        setIsLoading(true);
-        const response = await fetch(
+        const responseData = await sendRequest(
           `${process.env.REACT_APP_API_URL}/api/users/signup`,
+          'POST',
+          JSON.stringify({
+            name: formState.inputs.name.value,
+            email: formState.inputs.email.value,
+            password: formState.inputs.password.value,
+          }),
           {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              name: formState.inputs.name.value,
-              email: formState.inputs.email.value,
-              password: formState.inputs.password.value,
-            }),
+            'Content-Type': 'application/json',
           }
         );
-        const responseData = await response.json();
-        // fetch API는 400, 500번대 응답을 catch 블럭으로 처리하지 않아서 아래 if문 블럭 작성
-        if (!response.ok) {
-          throw new Error(responseData.message);
-        }
-        setIsLoading(false);
-        auth.login();
-      } catch (err) {
-        console.log(err);
-        setIsLoading(false);
-        setError(
-          err.message || '오류가 발생하였습니다. 잠시 후 다시 시도해주세요.'
-        );
-      }
+        auth.login(responseData.user.id);
+      } catch (err) {}
     }
-  };
-
-  const errorHandler = () => {
-    setError(null);
   };
 
   return (
     <React.Fragment>
-      <ErrorModal error={error} onClear={errorHandler} />
+      <ErrorModal error={error} onClear={clearError} />
       <Card className='authentication'>
         {isLoading && <LoadingSpinner asOverlay />}
         <h2>로그인</h2>
