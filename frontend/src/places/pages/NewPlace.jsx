@@ -6,6 +6,7 @@ import Input from '../../shared/components/FormElement/Input';
 import Button from '../../shared/components/FormElement/Button';
 import LoadingSpinner from '../../shared/components/UIElement/LoadingSpinner';
 import ErrorModal from '../../shared/components/UIElement/ErrorModal';
+import ImageUpload from '../../shared/components/FormElement/ImageUpload';
 import {
   VALIDATOR_MINLENGTH,
   VALIDATOR_REQUIRE,
@@ -40,18 +41,16 @@ const NewPlace = () => {
   const placeSubmitHandler = async (event) => {
     event.preventDefault();
     try {
+      const formData = new FormData();
+      formData.append('title', formState.inputs.title.value);
+      formData.append('description', formState.inputs.description.value);
+      formData.append('address', formState.inputs.address.value);
+      formData.append('image', formState.inputs.image.value);
+      formData.append('creator', auth.userId);
       await sendRequest(
         `${process.env.REACT_APP_API_URL}/api/places`,
         'POST',
-        JSON.stringify({
-          title: formState.inputs.title.value,
-          description: formState.inputs.description.value,
-          address: formState.inputs.address.value,
-          creator: auth.userId,
-        }),
-        {
-          'Content-Type': 'application/json',
-        }
+        formData
       );
       // 성공 시 리다이렉트
       history.push('/');
@@ -63,6 +62,12 @@ const NewPlace = () => {
       <ErrorModal error={error} onClear={clearError} />
       <form className='place-form' onSubmit={placeSubmitHandler}>
         {isLoading && <LoadingSpinner asOverlay />}
+        <ImageUpload
+          id='image'
+          center
+          onInput={inputHandler}
+          errorText='필수 입력 항목입니다.'
+        />
         <Input
           id='title'
           element='input'
