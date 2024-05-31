@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
 
 const HttpError = require('../models/http-error');
 const User = require('../models/user');
@@ -53,11 +54,23 @@ const signUp = async (req, res, next) => {
     return next(error);
   }
 
+  let hashedPassword;
+  try {
+    // 평문 비밀번호 해쉬
+    hashedPassword = await bcrypt.hash(password, 12);
+  } catch (err) {
+    const error = new HttpError(
+      '회원가입에 실패했으니 나중에 다시 시도하세요.',
+      500
+    );
+    return next(error);
+  }
+
   const createdUser = new User({
     name,
     email,
     image: req.file.path,
-    password,
+    password: hashedPassword,
     places: [],
   });
 
@@ -100,7 +113,27 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
-  if (!existingUser || existingUser.password !== password) {
+  if (!existingUser) {
+    const error = new HttpError(
+      '유효하지 않은 자격 증명으로 인해 로그인할 수 없습니다.',
+      401
+    );
+    return next(error);
+  }
+
+  let isValidPassword = false;
+  try {
+    // compare(): 평문 비밀번호와 데이터베이스에 저장되있는 해쉬 비밀번호가 일치한지 비교하는 함수
+    isValidPassword = await bcrypt.compare(password, existingUser.password);
+  } catch (err) {
+    const error = new HttpError(
+      '로그인에 실패했습니다. 나중에 다시 시도하세요.',
+      500
+    );
+    return next(error);
+  }
+
+  if (!isValidPassword) {
     const error = new HttpError(
       '유효하지 않은 자격 증명으로 인해 로그인할 수 없습니다.',
       401
