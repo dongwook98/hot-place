@@ -1,5 +1,6 @@
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const HttpError = require('../models/http-error');
 const User = require('../models/user');
@@ -40,7 +41,7 @@ const signUp = async (req, res, next) => {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
     const error = new HttpError(
-      '회원가입에 실패했으니 나중에 다시 시도하세요.',
+      '회원가입에 실패했습니다. 나중에 다시 시도하세요.',
       500
     );
     return next(error);
@@ -60,7 +61,7 @@ const signUp = async (req, res, next) => {
     hashedPassword = await bcrypt.hash(password, 12);
   } catch (err) {
     const error = new HttpError(
-      '회원가입에 실패했으니 나중에 다시 시도하세요.',
+      '회원가입에 실패했습니다. 나중에 다시 시도하세요.',
       500
     );
     return next(error);
@@ -79,7 +80,23 @@ const signUp = async (req, res, next) => {
     await createdUser.save();
   } catch (err) {
     const error = new HttpError(
-      '회원가입에 실패했습니다. 다시 시도하세요.',
+      '회원가입에 실패했습니다. 나중에 다시 시도하세요.',
+      500
+    );
+    return next(error);
+  }
+
+  let token;
+  try {
+    // sign(인코딩할 데이터, 프라이빗키, 옵션 객체): 토큰 생성 함수
+    token = jwt.sign(
+      { userId: createdUser.id, email: createdUser.email },
+      process.env.JWT_KEY,
+      { expiresIn: '1h' }
+    );
+  } catch (err) {
+    const error = new HttpError(
+      '회원가입에 실패했습니다. 나중에 다시 시도하세요.',
       500
     );
     return next(error);
@@ -87,7 +104,9 @@ const signUp = async (req, res, next) => {
 
   res.status(201).json({
     message: '회원가입에 성공하였습니다.',
-    user: createdUser.toObject({ getters: true }),
+    userId: createdUser.id,
+    email: createdUser.email,
+    token: token,
   });
 };
 
@@ -141,9 +160,26 @@ const login = async (req, res, next) => {
     return next(error);
   }
 
+  let token;
+  try {
+    token = jwt.sign(
+      { userId: existingUser.id, email: existingUser.email },
+      process.env.JWT_KEY,
+      { expiresIn: '1h' }
+    );
+  } catch (err) {
+    const error = new HttpError(
+      '로그인에 실패했습니다. 나중에 다시 시도하세요.',
+      500
+    );
+    return next(error);
+  }
+
   res.json({
     message: '로그인에 성공하였습니다.',
-    user: existingUser.toObject({ getters: true }),
+    userId: existingUser.id,
+    email: existingUser.email,
+    token: token,
   });
 };
 
