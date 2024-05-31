@@ -54,9 +54,12 @@ const NewPlace = () => {
       await sendRequest(
         `${process.env.REACT_APP_API_URL}/api/places`,
         'POST',
-        formData
+        formData,
+        {
+          Authorization: 'Bearer ' + auth.token,
+        }
       );
-      // 성공 시 리다이렉트
+
       history.push('/');
     } catch (err) {}
   };

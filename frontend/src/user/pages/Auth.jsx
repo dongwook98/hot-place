@@ -81,7 +81,7 @@ const Auth = () => {
             'Content-Type': 'application/json',
           }
         );
-        auth.login(responseData.user.id);
+        auth.login(responseData.userId, responseData.token);
       } catch (err) {}
     } else {
       // 바이너리 데이터인 파일을 전송하기 위해 FormData API 사용
@@ -96,7 +96,7 @@ const Auth = () => {
           'POST',
           formData // formData 사용 시 Fetch API가 자동으로 올바른 헤더 추가해줌
         );
-        auth.login(responseData.user.id);
+        auth.login(responseData.userId, responseData.token);
       } catch (err) {}
     }
   };

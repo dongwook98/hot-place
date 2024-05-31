@@ -37,7 +37,11 @@ const PlaceItem = (props) => {
     try {
       await sendRequest(
         `${process.env.REACT_APP_API_URL}/api/places/${props.id}`,
-        'DELETE'
+        'DELETE',
+        null,
+        {
+          Authorization: 'Bearer ' + auth.token,
+        }
       );
       props.onDelete(props.id);
     } catch (err) {}
