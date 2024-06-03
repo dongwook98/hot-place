@@ -158,6 +158,12 @@ const updatePlace = async (req, res, next) => {
     );
     return next(error);
   }
+
+  if (place.creator.toString() !== req.userData.userId) {
+    const error = new HttpError('해당 장소를 수정할 권한이 없습니다.', 401);
+    return next(error);
+  }
+
   place.title = title;
   place.description = description;
 
@@ -190,6 +196,11 @@ const deletePlace = async (req, res, next) => {
 
   if (!place) {
     const error = new HttpError('제공된 ID에 해당하는 장소가 없습니다.', 404);
+    return next(error);
+  }
+
+  if (place.creator.id !== req.userData.userId) {
+    const error = new HttpError('해당 장소를 삭제할 권한이 없습니다.', 401);
     return next(error);
   }
 
