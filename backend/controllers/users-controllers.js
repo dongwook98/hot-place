@@ -135,7 +135,7 @@ const login = async (req, res, next) => {
   if (!existingUser) {
     const error = new HttpError(
       '유효하지 않은 자격 증명으로 인해 로그인할 수 없습니다.',
-      401
+      403
     );
     return next(error);
   }

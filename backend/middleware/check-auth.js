@@ -24,7 +24,7 @@ module.exports = (req, res, next) => {
     next();
   } catch (err) {
     // Authorization 헤더가 정의되지 않아서 split 연산에 실패했을 경우
-    const error = new HttpError('인증에 실패했습니다.', 401);
+    const error = new HttpError('인증에 실패했습니다.', 403);
     return next(error);
   }
 };
