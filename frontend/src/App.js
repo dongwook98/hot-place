@@ -25,8 +25,10 @@ const App = () => {
     setToken(token);
     setUserId(userId);
     // 토큰 만료 기한
+    const offset = new Date().getTimezoneOffset() * 60000;
     const tokenExpirationDate =
-      expirationDate || new Date(new Date().getTime() + 1000 * 60 * 60);
+      expirationDate ||
+      new Date(new Date().getTime() + 1000 * 60 * 60 - offset);
     setTokenExpirationDate(tokenExpirationDate);
     window.localStorage.setItem(
       'userData',
