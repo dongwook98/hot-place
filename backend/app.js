@@ -70,7 +70,7 @@ mongoose
   )
   .then(() => {
     // DB 연결에 성공했을 경우. 서버 실행
-    app.listen(5001);
+    app.listen(process.env.PORT || 5001);
   })
   .catch((error) => {
     console.log(error);
