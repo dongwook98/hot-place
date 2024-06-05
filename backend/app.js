@@ -12,11 +12,6 @@ const HttpError = require('./models/http-error');
 
 const app = express();
 
-// AWS ELB 헬스 체크 API
-app.get('/health', (req, res) => {
-  res.status(200).send('Success Health Check');
-});
-
 // req.body 데이터를 받기위해 body-parser 패키지 사용.
 // 이 파서는 요청이 들어오면 본문을 파싱하고 본문에 있는 JSON 데이터를 추출해서
 // 객체나 배열과 같이 일반적인 JS 데이터 구조로 변환.
@@ -38,6 +33,11 @@ app.use((req, res, next) => {
   // 요청 메서드 허용
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
   next();
+});
+
+// AWS ELB 헬스 체크 API
+app.get('/health', (req, res) => {
+  res.status(200).send('Success Health Check');
 });
 
 app.use('/api/places', placesRoutes);
