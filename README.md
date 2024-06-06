@@ -43,6 +43,8 @@ react.js, react-router-dom
 
 node.js, express.js, mongoDB, mongoose
 
+서드파티 - axios, bcryptjs, body-parser, dotenv, express-validator, jsonwebtoken, multer, uuid, nodemon
+
 ### deploy
 
 frontend-deploy: AWS S3, AWS CloudFront
