@@ -12,27 +12,27 @@ const NavLinks = () => {
     <ul className='nav-links'>
       <li>
         <NavLink to='/' exact>
-          핫 스팟 구경
+          핫플 구경
         </NavLink>
       </li>
       {auth.isLoggedIn && (
         <li>
           <NavLink to={`${auth.userId}/places`} exact>
-            나의 스팟
+            나의 핫플
           </NavLink>
         </li>
       )}
       {auth.isLoggedIn && (
         <li>
           <NavLink to='/places/new' exact>
-            스팟 추가
+            핫플 추가
           </NavLink>
         </li>
       )}
       {!auth.isLoggedIn && (
         <li>
           <NavLink to='/auth' exact>
-            로그인 | 회원가입
+            로그인﹒회원가입
           </NavLink>
         </li>
       )}

@@ -125,7 +125,7 @@ const Auth = () => {
               center
               id='image'
               onInput={inputHandler}
-              errorText='이미지를 업로드 해주세요.'
+              errorText='.jpg,.png,.jpeg 형식만 가능합니다.'
             />
           )}
           <Input

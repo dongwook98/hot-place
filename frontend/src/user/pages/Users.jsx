@@ -26,7 +26,7 @@ const Users = () => {
       <ErrorModal error={error} onClear={clearError} />
       {isLoading && (
         <div className='center'>
-          <LoadingSpinner />
+          <LoadingSpinner asOverlay />
         </div>
       )}
       {/* ! http 요청이 완료되었을 경우에만 UserList 렌더링 */}

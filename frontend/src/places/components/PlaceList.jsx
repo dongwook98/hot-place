@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHistory } from 'react-router-dom';
 
 import './PlaceList.css';
 import PlaceItem from './PlaceItem';
@@ -6,13 +7,15 @@ import Card from '../../shared/components/UIElement/Card';
 import Button from '../../shared/components/FormElement/Button';
 
 const PlaceList = (props) => {
+  const history = useHistory();
+
   if (props.item.length === 0) {
     return (
       <div className='place-list center'>
         <Card>
-          <h2>공유중인 핫 스팟이 없습니다. 나만의 핫 스팟을 공유해보세요.</h2>
-          <Button to='/place/new' exact>
-            핫 스팟 공유하기
+          <h2>해당 유저는 공유중인 핫플이 없습니다.</h2>
+          <Button onClick={() => history.push('/')} exact>
+            홈으로 가기
           </Button>
         </Card>
       </div>

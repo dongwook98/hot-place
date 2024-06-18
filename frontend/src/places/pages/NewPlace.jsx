@@ -72,7 +72,7 @@ const NewPlace = () => {
           id='image'
           center
           onInput={inputHandler}
-          errorText='필수 입력 항목입니다.'
+          errorText='.jpg,.png,.jpeg 형식의 이미지만 업로드 가능합니다.'
         />
         <Input
           id='title'

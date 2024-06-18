@@ -53,7 +53,7 @@ const ImageUpload = (props) => {
       <div className={`image-upload ${props.center && 'center'}`}>
         <div className='image-upload__preview'>
           {previewUrl && <img src={previewUrl} alt='미리보기' />}
-          {!previewUrl && <p>이미지를 선택하세요.</p>}
+          {!previewUrl && <p>{props.placeholder || '이미지 미리보기'}</p>}
         </div>
         <Button type='button' onClick={pickImageHandler}>
           이미지 선택
